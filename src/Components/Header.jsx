@@ -1,15 +1,33 @@
 import { useContext } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { AuthContext } from "../Providers/AuthProvider";
 
 const Header = () => {
+    const { user, logOut, loading } = useContext(AuthContext)
 
-    const  {user} =useContext(AuthContext)
-    
+
+    const handleLogOut = () => {
+        logOut()
+            .then(() => {
+                console.log('user logged out successfully')
+            })
+            .catch(error => {
+                console.error(error);
+            })
+    }
     const navLink = <>
-    <li> <NavLink to='/'>Home</NavLink> </li>
-    <li> <NavLink to='/login'>Login</NavLink> </li>
-    <li> <NavLink to='/register'>Register</NavLink> </li>
+        <li> <NavLink to='/'>Home</NavLink> </li>
+        <li> <NavLink to='/login'>Login</NavLink> </li>
+        <li> <NavLink to='/register'>Register</NavLink> </li>
+        {
+            !loading ? user &&
+                <>
+                    <li> <NavLink to='/profile'>Profile</NavLink> </li>
+                    <li> <NavLink to='/orders'>Orders</NavLink> </li>
+                </>
+                :
+                <span></span>
+        }
     </>
     return (
         <div className="navbar bg-base-100 mx-10" >
@@ -31,9 +49,14 @@ const Header = () => {
             </div>
             <div className="navbar-end">
                 {
-                    user && <samp className="pr-3">{user.email}</samp>
+                    user ? <>
+                        <samp className="pr-3">{user.email}</samp>
+                        <a onClick={handleLogOut} className="btn btn-sm mr-20">Sign Out</a>
+                    </> :
+                        <>
+                            <button className="btn btn-sm mr-20"> <Link to='/login'>LogIn</Link> </button></>
                 }
-                <a className="btn btn-sm mr-20">Sign Out</a>
+
             </div>
         </div>
     );

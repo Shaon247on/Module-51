@@ -1,14 +1,16 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useContext, useState } from "react";
 import { AuthContext } from "../Providers/AuthProvider";
 
 
+
 const Login = () => {
     const [hidden, setHidden] = useState(true)
+    const navigate = useNavigate()
     const [errorMessage, setErrorMessage] = useState('')
     const [success, setSuccess] = useState('')
-    const {signInUser} = useContext(AuthContext)
+    const { signInUser, signInWithGoogle } = useContext(AuthContext)
     const handleLogin = e => {
         e.preventDefault()
         const email = e.target.email.value
@@ -18,16 +20,28 @@ const Login = () => {
         setSuccess('')
 
         signInUser(email, password)
-        .then(result => {
-            console.log(result.user)
-            setSuccess('Login Successful')
-        })
-        .catch(error =>{
-            console.error(error);
-            setErrorMessage(error.message)
-        })
+            .then(result => {
+                console.log(result.user)
+                setSuccess('Login Successful')
+                e.target.reset()
+                navigate('/')
+            })
+            .catch(error => {
+                console.error(error);
+                setErrorMessage(error.message)
+            })
     }
-    
+    const handleGoogleSignIn =() =>{
+        signInWithGoogle()
+        .then(result =>{
+            console.log(result.user)
+            setSuccess('Login Successful with Google')
+        })
+        .catch(error=>{
+            console.error(error);
+        })
+
+    }
 
     return (
         <div className="hero mx-10 bg-base-200">
@@ -69,14 +83,18 @@ const Login = () => {
                             <button className="btn btn-primary">Login</button>
                         </div>
                         <div>
-                            {errorMessage === 'Firebase: Error (auth/invalid-credential).'? <p className="text-red-500">Wrong Password or Email</p>: errorMessage}
+                            {errorMessage === 'Firebase: Error (auth/invalid-credential).' ? <p className="text-red-500">Wrong Password or Email</p> : errorMessage}
                             {
                                 success && <p className="text-green-500">{success}</p>
                             }
-
                         </div>
                         <div className="mt-3">
                             <p>New to the website, please <Link to='/register' className="text-blue-500 underline">Register</Link></p>
+                        </div>
+                        <div>
+                            <button 
+                            onClick={handleGoogleSignIn}
+                            className="btn text-lg font-bold bg-gradient-to-r from-green-500 from-10% via-red-400 to-yellow-100 w-full">Sign in With Google</button>
                         </div>
                     </form>
                     <button className="btn ml-[-45px] rounded-full absolute text-lg right-8 top-[160px] text-[15px]" onClick={() => setHidden(!hidden)}>{hidden ? <IoEye></IoEye> : <IoEyeOff></IoEyeOff>}</button>
