@@ -1,18 +1,33 @@
 import { Link } from "react-router-dom";
 import { IoEye, IoEyeOff } from "react-icons/io5";
-import { useState } from "react";
+import { useContext, useState } from "react";
+import { AuthContext } from "../Providers/AuthProvider";
 
 
 const Login = () => {
-    // const {signInUser}= useContext(AuthContext)
     const [hidden, setHidden] = useState(true)
+    const [errorMessage, setErrorMessage] = useState('')
+    const [success, setSuccess] = useState('')
+    const {signInUser} = useContext(AuthContext)
     const handleLogin = e => {
         e.preventDefault()
         const email = e.target.email.value
         const password = e.target.password.value
         console.log(email, password)
+        setErrorMessage('')
+        setSuccess('')
 
+        signInUser(email, password)
+        .then(result => {
+            console.log(result.user)
+            setSuccess('Login Successful')
+        })
+        .catch(error =>{
+            console.error(error);
+            setErrorMessage(error.message)
+        })
     }
+    
 
     return (
         <div className="hero mx-10 bg-base-200">
@@ -31,7 +46,7 @@ const Login = () => {
                                 name="email"
                                 type="email"
                                 placeholder="email"
-                                className="input input-bordered"
+                                className="input input-bordered border-0"
                                 required />
                         </div>
                         <div className="form-control">
@@ -43,9 +58,8 @@ const Login = () => {
                                     name="password"
                                     type={hidden ? 'text' : 'password'}
                                     placeholder="password"
-                                    className="input input-bordered w-full"
+                                    className="input input-bordered w-full border-0"
                                     required />
-                                <button className="btn ml-[-50px] rounded-full absolute" onClick={() => setHidden(!hidden)}>{hidden ? <IoEye></IoEye> : <IoEyeOff></IoEyeOff>}</button>
                             </div>
                             <label className="label">
                                 <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
@@ -54,10 +68,18 @@ const Login = () => {
                         <div className="form-control mt-6">
                             <button className="btn btn-primary">Login</button>
                         </div>
+                        <div>
+                            {errorMessage === 'Firebase: Error (auth/invalid-credential).'? <p className="text-red-500">Wrong Password or Email</p>: errorMessage}
+                            {
+                                success && <p className="text-green-500">{success}</p>
+                            }
+
+                        </div>
                         <div className="mt-3">
                             <p>New to the website, please <Link to='/register' className="text-blue-500 underline">Register</Link></p>
                         </div>
                     </form>
+                    <button className="btn ml-[-45px] rounded-full absolute text-lg right-8 top-[160px] text-[15px]" onClick={() => setHidden(!hidden)}>{hidden ? <IoEye></IoEye> : <IoEyeOff></IoEyeOff>}</button>
                 </div>
             </div>
         </div>

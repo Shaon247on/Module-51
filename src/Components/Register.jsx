@@ -2,30 +2,48 @@ import { Link } from "react-router-dom";
 import { IoEye, IoEyeOff } from "react-icons/io5";
 import { useContext, useState } from "react";
 import { AuthContext } from "../Providers/AuthProvider";
+import { updateProfile } from "firebase/auth";
+import auth from "../firebase/firebase";
 
 const Register = () => {
-
-    const authInfo = useContext(AuthContext)
-    console.log(authInfo)
-    const {cerateUser} = authInfo
     const [hidden, setHidden] = useState(true)
+    const [errorMessage, setErrorMessage] = useState('')
+    const [success, setSuccess] = useState('')
+    const authInfo = useContext(AuthContext)
+    const {createUser} = authInfo
     const handleRegister = e => {
         e.preventDefault()
         const name = e.target.name.value
         const email = e.target.email.value
         const password = e.target.password.value
         console.log(name, email, password)
+        setSuccess('')
+        setErrorMessage('')
         // create user in firebase
 
-        cerateUser(email, password)
+        createUser(email, password)
+        .then(result =>{
+            console.log(result.user)
+            setSuccess('Registration is Successful')
+        })
+        .catch(error=>{
+            console.error(error);
+            setErrorMessage(error.message)
+        })
+
+        updateProfile(auth.currentUser, {
+            displayName: name,
+            photoURL: "https://example.com/jane-q-user/profile.jpg"
+        })
         .then(result =>{
             console.log(result.user)
         })
-        .catch(error=>{
+        .catch(error =>{
             console.error(error);
         })
 
     }
+
 
     return (
         <div className="hero mx-10 bg-base-200">
@@ -70,7 +88,6 @@ const Register = () => {
                                     placeholder="password"
                                     className="input w-full border-none outline-none"
                                     required />
-                                <button className="btn ml-[-45px] rounded-full absolute text-lg" onClick={() => setHidden(!hidden)}>{hidden ? <IoEye></IoEye> : <IoEyeOff></IoEyeOff>}</button>
                             </div>
                             <label className="label">
                                 <a href="#" className="label-text-alt link link-hover">Forgot password?</a>
@@ -79,10 +96,18 @@ const Register = () => {
                         <div className="form-control mt-6">
                             <button className="btn btn-primary">Register</button>
                         </div>
+                        <div>
+                            {errorMessage === "Firebase: Error (auth/email-already-in-use)."? <p className="text-red-500">Your account is already registered</p>: <p className="text-red-500">{errorMessage}</p>}
+                            {
+                                success && <p className="text-green-500">{success}</p>
+                            }
+
+                        </div>
                         <div className="mt-3">
                             <p>Already have an Account, please <Link to='/login' className="text-blue-500 underline">Login</Link></p>
                         </div>
                     </form>
+                    <button className="btn ml-[-45px] rounded-full absolute text-lg right-8 top-[253px]" onClick={() => setHidden(!hidden)}>{hidden ? <IoEye></IoEye> : <IoEyeOff></IoEyeOff>}</button>                   
                 </div>
             </div>
         </div>
